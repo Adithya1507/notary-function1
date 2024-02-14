@@ -1,33 +1,42 @@
-import { Client } from 'node-appwrite';
+import { Databases, Client, Functions } from 'node-appwrite';
 
-// This is your Appwrite function
-// It's executed each time we get a request
 export default async ({ req, res, log, error }) => {
-  // Why not try the Appwrite SDK?
-  //
-  // const client = new Client()
-  //    .setEndpoint('https://cloud.appwrite.io/v1')
-  //    .setProject(process.env.APPWRITE_FUNCTION_PROJECT_ID)
-  //    .setKey(process.env.APPWRITE_API_KEY);
+    log("req" + req.body);
+    //const collectionModified = req.body.$collectionId;
+    const documentModified = "65cc8c3819ea60fce519";
+    const databaseId = "65c9a8c8d176e568ab13";
+    const collectionModified = "65c9a8d2705210df628f"
+    // if (collectionModified === "65c9a8d2705210df628f") {
+    //     if (parseInt(req.body.id) > 5) {
+            try {
+                // Initialize Appwrite client with the appropriate API key and project ID
+                // const client = new Client();
+                // client
+                //     .setEndpoint('https://cloud.appwrite.io/v1')
+                //     .setKey(EXTERNAL-API-KEY)
+                //     .setProject(EXTERNAL_PROJECT_ID);
 
-  // You can log messages to the console
-  log('Hello, Logs!');
+                // Access another project's collection
+                const externalClient = new Client();
+                externalClient
+                    .setEndpoint('https://cloud.appwrite.io/v1')
+                    .setKey(process.env.EXTERNAL_API_KEY)
+                    .setProject(process.env.EXTERNAL_PROJECT_ID);
 
-  // If something goes wrong, log an error
-  error('Hello, Errors!');
+                const databases = new Databases(externalClient);
 
-  // The `req` object contains the request data
-  if (req.method === 'GET') {
-    // Send a response with the res object helpers
-    // `res.send()` dispatches a string back to the client
-    return res.send('Hello, World!');
-  }
+                const document = await databases.getDocument(databaseId, collectionModified, documentModified);
 
-  // `res.json()` is a handy helper for sending JSON
-  return res.json({
-    motto: 'Build like a team of hundreds_',
-    learn: 'https://appwrite.io/docs',
-    connect: 'https://appwrite.io/discord',
-    getInspired: 'https://builtwith.appwrite.io',
-  });
+                // Perform actions with the document from the external project
+                log("Document from external project: " + JSON.stringify(document));
+
+                // You can continue with your logic here
+
+            } catch (error1) {
+                error('Error accessing document: ' + error1);
+            }
+    //     }
+    // }
+
+    return res.send("triggered");
 };
