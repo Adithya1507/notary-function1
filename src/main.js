@@ -3,9 +3,9 @@ import { Databases, Client, Functions } from 'node-appwrite';
 export default async ({ req, res, log, error }) => {
     log("req" + req.body);
     //const collectionModified = req.body.$collectionId;
-    const documentModified = "65cc8c3819ea60fce519";
-    const databaseId = "65c9a8c8d176e568ab13";
-    const collectionModified = "65c9a8d2705210df628f"
+    const documentModified = req.body.documentId;
+    const databaseId = req.body.databaseId;
+    const collectionModified = req.body.collectionId
     // if (collectionModified === "65c9a8d2705210df628f") {
     //     if (parseInt(req.body.id) > 5) {
             try {
