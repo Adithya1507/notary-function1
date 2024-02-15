@@ -34,19 +34,21 @@ export default async ({ req, res, log, error }) => {
         
                 if (foundDocument) {
                     // Document with txIdToCheck found
-                    log(`Document with txId ${txIdToCheck} exists in commit bucket.`);
+                    log(`Document with txId ${txIdToCheck} already exists in commit bucket.`);
                     
                 } else {
-                    await databases.deleteDocument(databaseId, collectionId_temp, documentId_temp);
+                   
 
            
                     await databases.createDocument(databaseId, '65cb6da52c7d440e9fe5',randomDocId, {
                      name:document.name,
                      id:document.id,
-                     status:document.status,
+                     status:"txn verified",
                      txId: txIdToCheck,
                 
-            });
+                  });
+
+            await databases.deleteDocument(databaseId, collectionId_temp, documentId_temp);
                     log(`Document with txId ${txIdToCheck} does not exist in commit bucket.`);
                 }
                 log("Document from external project: " + JSON.stringify(document));
