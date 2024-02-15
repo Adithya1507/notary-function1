@@ -10,7 +10,10 @@ export default async ({ req, res, log, error }) => {
     // const decrypt_url=process.env.decrypt-url.toString()
     const decrypt_url='https://65cd5d35f356a072ab28.appwrite.global/'
     log("decrypt_url"+decrypt_url)
-    const data=await axios.post(decrypt_url,cipherText);
+    const payload={
+        "objToDecrypt": cipherText
+    }
+    const data=await axios.post(decrypt_url,payload);
     // const documentId_temp = req.body.documentId;
     // const databaseId = req.body.databaseId;
     // const collectionId_temp = req.body.collectionId
