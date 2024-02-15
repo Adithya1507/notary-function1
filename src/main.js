@@ -17,10 +17,10 @@ export default async ({ req, res, log, error }) => {
     // const documentId_temp = req.body.documentId;
     // const databaseId = req.body.databaseId;
     // const collectionId_temp = req.body.collectionId
-    log("data: "+data.data)
+    log("data: "+JSON.stringify(data.data))
     const documentId_temp = data.data.encryptObject.documentId;
     const databaseId = data.data.encryptObject.databaseId;
-    const collectionId_temp = data.dataencryptObject.collectionId
+    const collectionId_temp = data.data.encryptObject.collectionId
     const randomDocId = uuidv4();
     //const randomDocId = uuid4().replace(/-/g, '').substring(0, 20);
             try {
