@@ -8,6 +8,7 @@ export default async ({ req, res, log, error }) => {
     
     const cipherText=req.body
     const decrypt_url=process.env.decrypt-url.toString()
+    log("decrypt_url"+decrypt_url)
     const data=await axios.post(decrypt_url,cipherText);
     // const documentId_temp = req.body.documentId;
     // const databaseId = req.body.databaseId;
