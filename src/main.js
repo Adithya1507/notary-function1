@@ -1,4 +1,7 @@
 import { Databases, Client, Functions } from 'node-appwrite';
+import { v4 as uuidv4 } from 'uuid';
+
+// Generate a random document ID
 
 export default async ({ req, res, log, error }) => {
     log("req" + req.body);
@@ -6,7 +9,7 @@ export default async ({ req, res, log, error }) => {
     const documentId_temp = req.body.documentId;
     const databaseId = req.body.databaseId;
     const collectionId_temp = req.body.collectionId
-   
+    const randomDocId = uuidv4();
             try {
                
 
@@ -37,7 +40,7 @@ export default async ({ req, res, log, error }) => {
                     await databases.deleteDocument(databaseId, collectionId_temp, documentId_temp);
 
            
-                    await databases.createDocument(databaseId, '65cb6da52c7d440e9fe5',"123", {
+                    await databases.createDocument(databaseId, '65cb6da52c7d440e9fe5',randomDocId, {
                      name:document.name,
                      id:document.id,
                      status:document.status,
