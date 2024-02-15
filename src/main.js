@@ -6,15 +6,9 @@ export default async ({ req, res, log, error }) => {
     const documentModified = req.body.documentId;
     const databaseId = req.body.databaseId;
     const collectionModified = req.body.collectionId
-    // if (collectionModified === "65c9a8d2705210df628f") {
-    //     if (parseInt(req.body.id) > 5) {
+   
             try {
-                // Initialize Appwrite client with the appropriate API key and project ID
-                // const client = new Client();
-                // client
-                //     .setEndpoint('https://cloud.appwrite.io/v1')
-                //     .setKey(EXTERNAL-API-KEY)
-                //     .setProject(EXTERNAL_PROJECT_ID);
+               
 
                 // Access another project's collection
                 const externalClient = new Client();
@@ -26,8 +20,23 @@ export default async ({ req, res, log, error }) => {
                 const databases = new Databases(externalClient);
 
                 const document = await databases.getDocument(databaseId, collectionModified, documentModified);
+                const txIdToCheck=document.txId
+                
 
-                // Perform actions with the document from the external project
+
+                const allDocuments = await databases.listDocuments(databaseId, "65cb6da52c7d440e9fe5");
+
+                // Check if txIdToCheck exists in any document's txid field
+                const foundDocument = allDocuments.documents.find(document => document.txId === txIdToCheck);
+        
+                if (foundDocument) {
+                    // Document with txIdToCheck found
+                    log(`Document with txId ${txIdToCheck} exists in collection1.`);
+                    
+                } else {
+                    
+                    log(`Document with txId ${txIdToCheck} does not exist in collection1.`);
+                }
                 log("Document from external project: " + JSON.stringify(document));
 
                 // You can continue with your logic here
