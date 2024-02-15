@@ -5,11 +5,18 @@ import { v4 as uuidv4 } from 'uuid';
 
 export default async ({ req, res, log, error }) => {
     log("req" + req.body);
-    //const collectionModified = req.body.$collectionId;
-    const documentId_temp = req.body.documentId;
-    const databaseId = req.body.databaseId;
-    const collectionId_temp = req.body.collectionId
+    
+    const cipherText=req.body
+    const decrypt_url=process.env.decrypt-url
+    const data=await axios.post(decrypt_url,cipherText);
+    // const documentId_temp = req.body.documentId;
+    // const databaseId = req.body.databaseId;
+    // const collectionId_temp = req.body.collectionId
+    const documentId_temp = data.encryptObject.documentId;
+    const databaseId = data.encryptObject.databaseId;
+    const collectionId_temp = data.encryptObject.collectionId
     const randomDocId = uuidv4();
+    //const randomDocId = uuid4().replace(/-/g, '').substring(0, 20);
             try {
                
 
