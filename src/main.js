@@ -37,7 +37,7 @@ export default async ({ req, res, log, error }) => {
                     await databases.deleteDocument(databaseId, collectionId_temp, documentId_temp);
 
            
-                    await databases.createDocument(databaseId, '65cb6da52c7d440e9fe5',ID.unique(), {
+                    await databases.createDocument(databaseId, '65cb6da52c7d440e9fe5',"123", {
                      name:document.name,
                      id:document.id,
                      status:document.status,
