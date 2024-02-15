@@ -1,6 +1,6 @@
 import { Databases, Client, Functions } from 'node-appwrite';
 import { v4 as uuidv4 } from 'uuid';
-
+import axios from 'axios';
 // Generate a random document ID
 
 export default async ({ req, res, log, error }) => {

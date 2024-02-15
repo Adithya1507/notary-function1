@@ -8,6 +8,7 @@
     "format": "prettier --write ."
   },
   "dependencies": {
+    "axios": "^1.6.7",
     "node-appwrite": "^9.0.0",
     "uuid": "^9.0.1"
   },
