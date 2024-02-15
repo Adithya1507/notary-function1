@@ -3,9 +3,9 @@ import { Databases, Client, Functions } from 'node-appwrite';
 export default async ({ req, res, log, error }) => {
     log("req" + req.body);
     //const collectionModified = req.body.$collectionId;
-    const documentModified = req.body.documentId;
+    const documentId_temp = req.body.documentId;
     const databaseId = req.body.databaseId;
-    const collectionModified = req.body.collectionId
+    const collectionId_temp = req.body.collectionId
    
             try {
                
@@ -19,7 +19,7 @@ export default async ({ req, res, log, error }) => {
 
                 const databases = new Databases(externalClient);
 
-                const document = await databases.getDocument(databaseId, collectionModified, documentModified);
+                const document = await databases.getDocument(databaseId, collectionId_temp, documentId_temp);
                 const txIdToCheck=document.txId
                 
 
@@ -31,11 +31,20 @@ export default async ({ req, res, log, error }) => {
         
                 if (foundDocument) {
                     // Document with txIdToCheck found
-                    log(`Document with txId ${txIdToCheck} exists in collection1.`);
+                    log(`Document with txId ${txIdToCheck} exists in commit bucket.`);
                     
                 } else {
-                    
-                    log(`Document with txId ${txIdToCheck} does not exist in collection1.`);
+                    await databases.deleteDocument(databaseId, collectionId_temp, documentId_temp);
+
+           
+                    await databases.createDocument(databaseId, '65cb6da52c7d440e9fe5',ID.unique(), {
+                     name:document.name,
+                     id:document.id,
+                     status:document.status,
+                     txId: txIdToCheck,
+                
+            });
+                    log(`Document with txId ${txIdToCheck} does not exist in commit bucket.`);
                 }
                 log("Document from external project: " + JSON.stringify(document));
 
