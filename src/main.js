@@ -41,10 +41,11 @@ export default async ({ req, res, log, error }) => {
 
 
             const account = new Account(externalClient);
-            //const response = await externalClient.account.get();
-        log("response",account.toString())
+               //const response = await externalClient.account.get();
+               const response = await account.get();
+           log("response",response)
             // Get organization ID from the response
-            const organizationId = account.result.organizations[0].$id;
+            const organizationId = response.result.organizations[0].$id;
             
             log('Organization ID:', organizationId);
             const databases = new Databases(externalClient);
