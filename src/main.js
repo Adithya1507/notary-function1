@@ -7,15 +7,24 @@ export default async ({ req, res, log, error }) => {
     log("req" + req.body);
     
     const cipherText=req.body
-    const decrypt_url=process.env.decrypt_url
-    const payload={
-        "objToDecrypt": cipherText
-    }
-    const decryptedData=await axios.post(decrypt_url,payload);
+
+
+
+    const decryptedData=decryptObject(
+        cipherText ,
+        Buffer.from(process.env.NONCEHASH, "hex"),
+        Buffer.from(process.env.KEY, "hex")
+      
+      )
+    // const decrypt_url=process.env.decrypt_url
+    // const payload={
+    //     "objToDecrypt": cipherText
+    // }
+    // const decryptedData=await axios.post(decrypt_url,payload);
   
-    const documentId_temp = decryptedData.data.encryptObject.documentId;
-    const databaseId = decryptedData.data.encryptObject.databaseId;
-    const collectionId_temp = decryptedData.data.encryptObject.collectionId
+    const documentId_temp = decryptedData.documentId;
+    const databaseId = decryptedData.databaseId;
+    const collectionId_temp = decryptedData.collectionId
     const commitBucketId=process.env.commit_Bucket_Id
     const randomDocId = uuidv4(); 
     try {
@@ -60,3 +69,23 @@ export default async ({ req, res, log, error }) => {
         }
             
 };
+
+
+
+const decryptObject = (ciphertextHex, nonceHex, key) => {
+    // Decode hexadecimal strings to buffers
+    const ciphertext = Buffer.from(ciphertextHex, "hex");
+    const nonce = Buffer.from(nonceHex, "hex");
+ 
+    // Decrypt the ciphertext
+    const decrypted = Buffer.alloc(
+      ciphertext.length - sodium.crypto_secretbox_MACBYTES
+    );
+    if (sodium.crypto_secretbox_open_easy(decrypted, ciphertext, nonce, key)) {
+      // Parse the decrypted string back into an object
+      const decryptedObj = JSON.parse(decrypted.toString());
+      return decryptedObj;
+    } else {
+      throw new Error("Decryption failed!");
+    }
+  };
