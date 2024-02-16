@@ -40,14 +40,7 @@ export default async ({ req, res, log, error }) => {
             .setProject(process.env.EXTERNAL_PROJECT_ID);
 
 
-            const account = new Account(externalClient);
-               //const response = await externalClient.account.get();
-               const response = await account.get();
-           log("response",response)
-            // Get organization ID from the response
-            const organizationId = response.result.organizations[0].$id;
-            
-            log('Organization ID:', organizationId);
+           
             const databases = new Databases(externalClient);
 
             const document = await databases.getDocument(databaseId, collectionId_temp, documentId_temp);
