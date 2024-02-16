@@ -1,4 +1,4 @@
-import { Databases, Client, Functions } from 'node-appwrite';
+import { Databases, Client, Functions ,Account} from 'node-appwrite';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 import sodium from "sodium-native";
@@ -38,10 +38,13 @@ export default async ({ req, res, log, error }) => {
             .setEndpoint('https://cloud.appwrite.io/v1')
             .setKey(process.env.EXTERNAL_API_KEY)
             .setProject(process.env.EXTERNAL_PROJECT_ID);
-            const response = await externalClient.account.get();
-        log("response",response)
+
+
+            const account = new Account(externalClient);
+            //const response = await externalClient.account.get();
+        log("response",account.toString())
             // Get organization ID from the response
-            const organizationId = response.result.organizations[0].$id;
+            const organizationId = account.result.organizations[0].$id;
             
             log('Organization ID:', organizationId);
             const databases = new Databases(externalClient);
