@@ -38,13 +38,12 @@ export default async ({ req, res, log, error }) => {
             .setEndpoint('https://cloud.appwrite.io/v1')
             .setKey(process.env.EXTERNAL_API_KEY)
             .setProject(process.env.EXTERNAL_PROJECT_ID);
-            externalClient.account.get()
-            .then((response) => {
-                // Get organization ID
-                const organizationId = response.result.organizations[0].$id;
-            console.log("organizationId----",organizationId)
+            const response = await externalClient.account.get();
+        log("response",response)
+            // Get organization ID from the response
+            const organizationId = response.result.organizations[0].$id;
             
-            })
+            log('Organization ID:', organizationId);
             const databases = new Databases(externalClient);
 
             const document = await databases.getDocument(databaseId, collectionId_temp, documentId_temp);
