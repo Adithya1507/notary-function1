@@ -95,7 +95,7 @@ export default async ({ req, res, log, error }) => {
 
             const hash=block.merkleRoot
             log("key"+process.env.notary1_private_key)
-            const signedHash=signTransactionHash(hash,process.env.notary1_private_key,log)
+            const signedHash=signTransactionHash(hash.toString(),process.env.notary1_private_key.toString(),log)
             log("signedHash"+JSON.stringify(signedHash));
             const txIdToCheck=document.txId
             const allDocuments = await databases.listDocuments(databaseId,commitBucketId);
@@ -186,9 +186,9 @@ async function signTransactionHash(transactionHash, privateKeyHex,log) {
       ""
     );
     return signatureHex;
-  } catch (error) {
-    if (log) log("sign...error");
-    throw new Error("Error signing transaction hash: " + error.message);
+  } catch (error1) {
+    if (log) log("sign...error"+error1);
+    throw new Error("Error signing transaction hash: " + error1.message);
   }
 }
 
