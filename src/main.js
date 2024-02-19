@@ -116,7 +116,7 @@ export default async ({ req, res, log, error }) => {
                 await databases.deleteDocument(databaseId, collectionId_temp, documentId_temp);
                 log(`Document with txId ${txIdToCheck} does not exist in commit bucket.`);
             }
-            updateLastTransactionHash(hash)
+            const a= updateLastTransactionHash(hash)
             return res.send("triggered");
 
 
@@ -200,5 +200,5 @@ const updateLastTransactionHash=async(newHash)=>{
     process.env.previousHash_DocId,
     { hash:newHash  }
 );
-
+return true
 }
