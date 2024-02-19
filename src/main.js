@@ -32,7 +32,7 @@ export default async ({ req, res, log, error }) => {
             .setKey(process.env.EXTERNAL_API_KEY)
             .setProject(process.env.EXTERNAL_PROJECT_ID);
             const databases = new Databases(externalClient);
-            const document=null;
+            let document=null;
             try{
                document = await databases.getDocument(databaseId, collectionId_temp, documentId_temp);}
               catch(error1)
