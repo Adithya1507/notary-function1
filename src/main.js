@@ -112,7 +112,7 @@ export default async ({ req, res, log, error }) => {
                 status:"txn verified",
                 txId: txIdToCheck,
                 hash:hash.toString(),
-                signedHash:signedHash
+                signedHash:signedHash.signTransactionHash
 
                 });
 
