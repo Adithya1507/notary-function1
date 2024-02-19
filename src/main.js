@@ -29,7 +29,7 @@ export default async ({ req, res, log, error }) => {
     try {
             // for smart contract client
 
-            const previousHash = await getPreviousHash(process.env.DATABASE_ID,process.env.previousHash_CollectionId,process.env.previousHash_DocId)
+            const previousHash = await getPreviousHash(process.env.PROJECT_ID,process.env.DATABASE_ID,process.env.previousHash_CollectionId,process.env.previousHash_DocId)
             log("previousHash"+previousHash)
             const externalClient = new Client();
             externalClient
@@ -154,12 +154,13 @@ const decryptObject = (ciphertextHex, nonceHex, key) => {
   };
 
 
-const getPreviousHash =async (databaseId,collectionId,docId) =>{
+const getPreviousHash =async (projectId,databaseId,collectionId,docId) =>{
 
   const client = new Client();
    client
   .setEndpoint('https://cloud.appwrite.io/v1')
-  .setProject(process.env.PROJECT_ID);
+  .setProject(projectId);
+ 
   const databases = new Databases(client);
 
   const document = await databases.getDocument(databaseId,collectionId,docId);
