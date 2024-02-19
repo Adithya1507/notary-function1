@@ -157,7 +157,7 @@ const decryptObject = (ciphertextHex, nonceHex, key) => {
 const  getPreviousHash =async () =>{
 
   const client = new Client();
-  externalClient
+ client
   .setEndpoint('https://cloud.appwrite.io/v1')
   .setProject(process.env.PROJECT_ID);
   const databases = new Databases(client);
