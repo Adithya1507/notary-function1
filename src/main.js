@@ -29,9 +29,9 @@ export default async ({ req, res, log, error }) => {
     try {
             // for smart contract client
 
-           // const previousHash = await getPreviousHash(process.env.PROJECT_ID,process.env.DATABASE_ID,process.env.previousHash_CollectionId,process.env.previousHash_DocId)
+           const previousHash = await getPreviousHash(process.env.PROJECT_ID,process.env.DATABASE_ID,process.env.previousHash_CollectionId,process.env.previousHash_DocId,process.env.APPWRITE_API_KEY)
            
-           const previousHash="0000"
+           //const previousHash="0000"
            log("previousHash"+previousHash)
             const externalClient = new Client();
             externalClient
@@ -120,7 +120,8 @@ export default async ({ req, res, log, error }) => {
                 await databases.deleteDocument(databaseId, collectionId_temp, documentId_temp);
                 log(`Document with txId ${txIdToCheck} does not exist in commit bucket.`);
             }
-            const a= updateLastTransactionHash(hash)
+            const a= updateLastTransactionHash(hash,process.env.PROJECT_ID,process.env.DATABASE_ID,process.env.previousHash_CollectionId,process.env.previousHash_DocId,process.env.APPWRITE_API_KEY)
+            
             return res.send("triggered");
 
 
@@ -158,12 +159,13 @@ const decryptObject = (ciphertextHex, nonceHex, key) => {
   };
 
 
-const getPreviousHash =async (projectId,databaseId,collectionId,docId) =>{
+const getPreviousHash =async (projectId,databaseId,collectionId,docId,apikey) =>{
 
   const client = new Client();
    client
   .setEndpoint('https://cloud.appwrite.io/v1')
-  .setProject(projectId);
+  .setProject(projectId)
+  .setKey(apikey);
  
   const databases = new Databases(client);
 
@@ -193,17 +195,19 @@ async function signTransactionHash(transactionHash, privateKeyHex,log) {
 }
 
 
-const updateLastTransactionHash=async(newHash)=>{
+const updateLastTransactionHash=async(newHash,projectId,databaseId,collectionId,docId,apikey)=>{
   const client = new Client();
   externalClient
   .setEndpoint('https://cloud.appwrite.io/v1')
-  .setProject(process.env.PROJECT_ID);
+  .setProject(projectId)
+  .setKey(apikey);
   const databases = new Databases(client);
+  try{
   await databases.updateDocument(
-    process.env.DATABASE_ID, 
-    process.env.previousHash_CollectionId,
-    process.env.previousHash_DocId,
+    databaseId, 
+    collectionId,
+    docId,
     { hash:newHash  }
-);
+);}catch(error1){log("erro1: "+error1)}
 return true
 }
