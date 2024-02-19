@@ -29,8 +29,10 @@ export default async ({ req, res, log, error }) => {
     try {
             // for smart contract client
 
-            const previousHash = await getPreviousHash(process.env.PROJECT_ID,process.env.DATABASE_ID,process.env.previousHash_CollectionId,process.env.previousHash_DocId)
-            log("previousHash"+previousHash)
+           // const previousHash = await getPreviousHash(process.env.PROJECT_ID,process.env.DATABASE_ID,process.env.previousHash_CollectionId,process.env.previousHash_DocId)
+           
+           const previousHash="0000"
+           log("previousHash"+previousHash)
             const externalClient = new Client();
             externalClient
             .setEndpoint('https://cloud.appwrite.io/v1')
