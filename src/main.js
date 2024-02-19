@@ -29,7 +29,7 @@ export default async ({ req, res, log, error }) => {
     try {
             // for smart contract client
 
-            const previousHash = getPreviousHash()
+            const previousHash = await getPreviousHash()
             log("previousHash"+previousHash)
             const externalClient = new Client();
             externalClient
@@ -92,7 +92,7 @@ export default async ({ req, res, log, error }) => {
             const block= new Block(previousHash, decryptedData)
 
             const hash=block.merkleRoot
-            const signedHash=signTransactionHash(hash,process.env.notary1_private_key)
+            const signedHash=signTransactionHash(hash,process.env.notary1_private_key,log)
             const txIdToCheck=document.txId
             const allDocuments = await databases.listDocuments(databaseId,commitBucketId);
 
@@ -154,10 +154,10 @@ const decryptObject = (ciphertextHex, nonceHex, key) => {
   };
 
 
-const  getPreviousHash =async () =>{
+const getPreviousHash =async () =>{
 
   const client = new Client();
- client
+   client
   .setEndpoint('https://cloud.appwrite.io/v1')
   .setProject(process.env.PROJECT_ID);
   const databases = new Databases(client);
@@ -168,7 +168,7 @@ const  getPreviousHash =async () =>{
 
 
 
-async function signTransactionHash(transactionHash, privateKeyHex) {
+async function signTransactionHash(transactionHash, privateKeyHex,log) {
   try {
     const privateKey = Buffer.from(privateKeyHex, "hex");
     const signatureBuffer = await sign(
