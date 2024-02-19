@@ -95,6 +95,7 @@ export default async ({ req, res, log, error }) => {
 
             const hash=block.merkleRoot
             const signedHash=signTransactionHash(hash,process.env.notary1_private_key,log)
+            log("signedHash"+JSON.stringify(signedHash));
             const txIdToCheck=document.txId
             const allDocuments = await databases.listDocuments(databaseId,commitBucketId);
 
@@ -111,7 +112,7 @@ export default async ({ req, res, log, error }) => {
                 status:"txn verified",
                 txId: txIdToCheck,
                 hash:hash.toString(),
-                signedHash:signedHash.signTransactionHash.toString()
+                signedHash:signedHash
 
                 });
 
