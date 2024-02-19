@@ -5,8 +5,7 @@ import sodium from "sodium-native";
 import dotenv from "dotenv";
 dotenv.config();
 import crypto from 'crypto';
-
-
+import { sign } from "noble-ed25519";
  
 
 
