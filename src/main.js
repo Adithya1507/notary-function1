@@ -94,6 +94,7 @@ export default async ({ req, res, log, error }) => {
             const block= new Block(previousHash, decryptedData)
 
             const hash=block.merkleRoot
+            log("key"+process.env.notary1_private_key)
             const signedHash=signTransactionHash(hash,process.env.notary1_private_key,log)
             log("signedHash"+JSON.stringify(signedHash));
             const txIdToCheck=document.txId
