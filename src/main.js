@@ -31,6 +31,7 @@ export default async ({ req, res, log, error }) => {
             // for smart contract client
 
             const previousHash = getPreviousHash()
+            log("previousHash"+previousHash)
             const externalClient = new Client();
             externalClient
             .setEndpoint('https://cloud.appwrite.io/v1')
@@ -108,8 +109,8 @@ export default async ({ req, res, log, error }) => {
                 id:document.id,
                 status:"txn verified",
                 txId: txIdToCheck,
-                hash:hash,
-                signedHash:signedHash
+                hash:hash.toString(),
+                signedHash:signedHash.toString()
 
                 });
 
