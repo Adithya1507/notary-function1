@@ -29,7 +29,7 @@ export default async ({ req, res, log, error }) => {
     try {
             // for smart contract client
 
-            const previousHash = await getPreviousHash()
+            const previousHash = await getPreviousHash(process.env.DATABASE_ID,process.env.previousHash_CollectionId,process.env.previousHash_DocId)
             log("previousHash"+previousHash)
             const externalClient = new Client();
             externalClient
@@ -154,7 +154,7 @@ const decryptObject = (ciphertextHex, nonceHex, key) => {
   };
 
 
-const getPreviousHash =async () =>{
+const getPreviousHash =async (databaseId,collectionId,docId) =>{
 
   const client = new Client();
    client
@@ -162,7 +162,7 @@ const getPreviousHash =async () =>{
   .setProject(process.env.PROJECT_ID);
   const databases = new Databases(client);
 
-  const document = await databases.getDocument(process.env.DATABASE_ID, process.env.previousHash_CollectionId, process.env.previousHash_DocId);
+  const document = await databases.getDocument(databaseId,collectionId,docId);
   return document.hash
 };
 
