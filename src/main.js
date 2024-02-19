@@ -26,6 +26,8 @@ export default async ({ req, res, log, error }) => {
     const randomDocId = uuidv4(); 
     try {
             // for smart contract client
+
+            const previousHash = getPreviousHash()
             const externalClient = new Client();
             externalClient
             .setEndpoint('https://cloud.appwrite.io/v1')
@@ -38,6 +40,56 @@ export default async ({ req, res, log, error }) => {
               catch(error1)
               {log("this document does not exists in temp bucket");
             return res.send("document does not exists in the temp bucket");}
+
+
+            class Block {
+              constructor(previousHash, transaction) {
+                this.previousHash = previousHash;
+                this.transaction = transaction;
+                this.encryptTransaction();
+                this.calculateMerkleRoot();
+                this.nonce = 0; // For simplicity, we're not implementing proof-of-work here
+              }
+           
+              encryptTransaction() {
+                // Convert transaction object to JSON string
+                const transactionString = JSON.stringify(this.transaction);
+           
+                // Generate a random 32-byte key and nonce
+                const key = Buffer.alloc(sodium.crypto_secretbox_KEYBYTES);
+                sodium.randombytes_buf(key);
+                const nonce = Buffer.alloc(sodium.crypto_secretbox_NONCEBYTES);
+                sodium.randombytes_buf(nonce);
+           
+                // Encrypt the transaction payload with XSalsa20
+                this.encryptedTransaction = Buffer.alloc(
+                  transactionString.length + sodium.crypto_secretbox_MACBYTES
+                );
+                sodium.crypto_secretbox_easy(
+                  this.encryptedTransaction,
+                  Buffer.from(transactionString),
+                  nonce,
+                  key
+                );
+           
+                // Generate Poly1305 authentication tag for the encrypted payload
+                this.transactionTag = Buffer.alloc(sodium.crypto_auth_BYTES);
+                sodium.crypto_auth(this.transactionTag, this.encryptedTransaction, key);
+              }
+           
+              calculateMerkleRoot() {
+                const transactionHash = this.hash(this.encryptedTransaction);
+                this.merkleRoot = transactionHash;
+              }
+           
+              hash(data) {
+                return crypto.createHash("blake2b512").update(data).digest("hex");
+              }
+            }
+            const block= new Block(previousHash, decryptedData)
+
+            const hash=block.merkleRoot
+            const signedHash=signTransactionHash(hash,process.env.notary1_private_key)
             const txIdToCheck=document.txId
             const allDocuments = await databases.listDocuments(databaseId,commitBucketId);
 
@@ -53,6 +105,8 @@ export default async ({ req, res, log, error }) => {
                 id:document.id,
                 status:"txn verified",
                 txId: txIdToCheck,
+                hash:hash,
+                signedHash:signedHash
 
                 });
 
@@ -61,6 +115,12 @@ export default async ({ req, res, log, error }) => {
             }
             
             return res.send("triggered");
+
+
+
+
+
+           
        
 
         } catch (error1) {
@@ -89,3 +149,37 @@ const decryptObject = (ciphertextHex, nonceHex, key) => {
       throw new Error("Decryption failed!");
     }
   };
+
+
+const  getPreviousHash =async () =>{
+
+  const client = new Client();
+  externalClient
+  .setEndpoint('https://cloud.appwrite.io/v1')
+  .setProject(process.env.PROJECT_ID);
+  const databases = new Databases(client);
+
+  const document = await databases.getDocument(process.env.DATABASE_ID, process.env.previousHash_CollectionId, process.env.previousHash_DocId);
+  return document.hash
+};
+
+
+
+async function signTransactionHash(transactionHash, privateKeyHex) {
+  try {
+    const privateKey = Buffer.from(privateKeyHex, "hex");
+    const signatureBuffer = await sign(
+      Buffer.from(transactionHash, "hex"),
+      privateKey
+    );
+    // Convert the signature bytes to a hexadecimal string
+    const signatureHex = signatureBuffer.reduce(
+      (str, byte) => str + byte.toString(16).padStart(2, "0"),
+      ""
+    );
+    return signatureHex;
+  } catch (error) {
+    if (log) log("sign...error");
+    throw new Error("Error signing transaction hash: " + error.message);
+  }
+}
