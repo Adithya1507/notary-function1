@@ -120,7 +120,7 @@ export default async ({ req, res, log, error }) => {
                 await databases.deleteDocument(databaseId, collectionId_temp, documentId_temp);
                 log(`Document with txId ${txIdToCheck} does not exist in commit bucket.`);
             }
-            const a= updateLastTransactionHash(hash,process.env.PROJECT_ID,process.env.DATABASE_ID,process.env.previousHash_CollectionId,process.env.previousHash_DocId,process.env.APPWRITE_API_KEY)
+            const updatedHash=  updateLastTransactionHash(hash,process.env.PROJECT_ID,process.env.DATABASE_ID,process.env.previousHash_CollectionId,process.env.previousHash_DocId,process.env.APPWRITE_API_KEY)
             
             return res.send("triggered");
 
@@ -197,7 +197,7 @@ async function signTransactionHash(transactionHash, privateKeyHex,log) {
 
 const updateLastTransactionHash=async(newHash,projectId,databaseId,collectionId,docId,apikey)=>{
   const client = new Client();
-  externalClient
+  client
   .setEndpoint('https://cloud.appwrite.io/v1')
   .setProject(projectId)
   .setKey(apikey);
@@ -209,5 +209,5 @@ const updateLastTransactionHash=async(newHash,projectId,databaseId,collectionId,
     docId,
     { hash:newHash  }
 );}catch(error1){log("erro1: "+error1)}
-return true
+return newHash
 }
