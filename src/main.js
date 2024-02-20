@@ -194,6 +194,9 @@ const getPreviousHash =async (projectId,databaseId,collectionId,docId,apikey) =>
 
 async function signTransactionHash(transactionHash, privateKeyHex,log) {
   try {
+
+    log("hash "+hash);
+    log("privateKeyHex"+privateKeyHex);
     const privateKey = Buffer.from(privateKeyHex, "hex");
     const signatureBuffer = await sign(
       Buffer.from(transactionHash, "hex"),
@@ -204,6 +207,7 @@ async function signTransactionHash(transactionHash, privateKeyHex,log) {
       (str, byte) => str + byte.toString(16).padStart(2, "0"),
       ""
     );
+    log("signatureHex"+signatureHex)
     return signatureHex;
   } catch (error1) {
     if (log) log("sign...error"+error1);
