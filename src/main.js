@@ -125,7 +125,7 @@ export default async ({ req, res, log, error }) => {
 
               //sign the hash using the notary's private key
               const signedHash=signTransactionHash(hash.toString(),process.env.notary1_private_key.toString(),log)
-             
+             log("signedHash:"+signedHash)
               //add the transaction in commit bucket
               await databases.createDocument(databaseId, commitBucketId ,randomDocId, {
               name:document.name,
@@ -133,7 +133,7 @@ export default async ({ req, res, log, error }) => {
               status:"txn verified",
               txId: txIdToCheck,
               hash:hash.toString(),
-              signedHash:signedHash.signTransactionHash
+              signedHash:signedHash
 
               });
 
