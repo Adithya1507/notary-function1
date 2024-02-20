@@ -13,6 +13,9 @@ export default async ({ req, res, log, error }) => {
    
     
         const cipherText=req.body
+
+
+        //function to decrypt the encrypted data
         const decryptedData=decryptObject(
         cipherText ,
         Buffer.from(process.env.NONCEHASH, "hex"),
@@ -20,15 +23,15 @@ export default async ({ req, res, log, error }) => {
       
       )
 
-    //retrieve the data from decrypted object
-    const documentId_temp = decryptedData.documentId;
-    const databaseId = decryptedData.databaseId;
-    const collectionId_temp = decryptedData.collectionId
-    const commitBucketId=process.env.commit_Bucket_Id
-    const randomDocId = uuidv4(); 
-    try {
-            // for smart contract client
-
+        //retrieve the data from decrypted object
+        const documentId_temp = decryptedData.documentId;
+        const databaseId = decryptedData.databaseId;
+        const collectionId_temp = decryptedData.collectionId
+        const commitBucketId=process.env.commit_Bucket_Id
+        const randomDocId = uuidv4(); 
+       try {
+          
+           //get the previous hash from the collection "previousHash"
            const previousHash = await getPreviousHash(process.env.PROJECT_ID,process.env.DATABASE_ID,process.env.previousHash_CollectionId,process.env.previousHash_DocId,process.env.APPWRITE_API_KEY)
            
            //const previousHash="0000"
@@ -40,63 +43,20 @@ export default async ({ req, res, log, error }) => {
             .setProject(process.env.EXTERNAL_PROJECT_ID);
             const databases = new Databases(externalClient);
             let document=null;
-            try{
-               document = await databases.getDocument(databaseId, collectionId_temp, documentId_temp);}
+
+
+            //try retriving the data from temp bucket from the data decrypted
+             try{
+               document = await databases.getDocument(databaseId, collectionId_temp, documentId_temp);
+              }
               catch(error1)
-              {log("this document does not exists in temp bucket");
-            return res.send("document does not exists in the temp bucket");}
+              {
+                log("this document does not exists in temp bucket");
+                return res.send("document does not exists in the temp bucket");
+              }
 
 
-            class Block {
-              constructor(previousHash, transaction) {
-                this.previousHash = previousHash;
-                this.transaction = transaction;
-                this.encryptTransaction();
-                this.calculateMerkleRoot();
-                this.nonce = 0; // For simplicity, we're not implementing proof-of-work here
-              }
-           
-              encryptTransaction() {
-                // Convert transaction object to JSON string
-                const transactionString = JSON.stringify(this.transaction);
-           
-                // Generate a random 32-byte key and nonce
-                const key = Buffer.alloc(sodium.crypto_secretbox_KEYBYTES);
-                sodium.randombytes_buf(key);
-                const nonce = Buffer.alloc(sodium.crypto_secretbox_NONCEBYTES);
-                sodium.randombytes_buf(nonce);
-           
-                // Encrypt the transaction payload with XSalsa20
-                this.encryptedTransaction = Buffer.alloc(
-                  transactionString.length + sodium.crypto_secretbox_MACBYTES
-                );
-                sodium.crypto_secretbox_easy(
-                  this.encryptedTransaction,
-                  Buffer.from(transactionString),
-                  nonce,
-                  key
-                );
-           
-                // Generate Poly1305 authentication tag for the encrypted payload
-                this.transactionTag = Buffer.alloc(sodium.crypto_auth_BYTES);
-                sodium.crypto_auth(this.transactionTag, this.encryptedTransaction, key);
-              }
-           
-              calculateMerkleRoot() {
-                const transactionHash = this.hash(this.encryptedTransaction);
-                this.merkleRoot = transactionHash;
-              }
-           
-              hash(data) {
-                return crypto.createHash("blake2b512").update(data).digest("hex");
-              }
-            }
-            const block= new Block(previousHash, decryptedData)
-
-            const hash=block.merkleRoot
-            log("key"+process.env.notary1_private_key)
-            const signedHash=signTransactionHash(hash.toString(),process.env.notary1_private_key.toString(),log)
-            log("signedHash"+JSON.stringify(signedHash));
+            
             const txIdToCheck=document.txId
             const allDocuments = await databases.listDocuments(databaseId,commitBucketId);
 
@@ -107,33 +67,90 @@ export default async ({ req, res, log, error }) => {
                 log(`Document with txId ${txIdToCheck} already exists in commit bucket.`);
 
             } else {
-                await databases.createDocument(databaseId, commitBucketId ,randomDocId, {
-                name:document.name,
-                id:document.id,
-                status:"txn verified",
-                txId: txIdToCheck,
-                hash:hash.toString(),
-                signedHash:signedHash.signTransactionHash
 
-                });
 
-                await databases.deleteDocument(databaseId, collectionId_temp, documentId_temp);
-                log(`Document with txId ${txIdToCheck} does not exist in commit bucket.`);
+
+              class Block {
+                constructor(previousHash, transaction) {
+                  this.previousHash = previousHash;
+                  this.transaction = transaction;
+                  this.encryptTransaction();
+                  this.calculateMerkleRoot();
+                  this.nonce = 0; // For simplicity, we're not implementing proof-of-work here
+                }
+             
+                encryptTransaction() {
+                  // Convert transaction object to JSON string
+                  const transactionString = JSON.stringify(this.transaction);
+             
+                  // Generate a random 32-byte key and nonce
+                  const key = Buffer.alloc(sodium.crypto_secretbox_KEYBYTES);
+                  sodium.randombytes_buf(key);
+                  const nonce = Buffer.alloc(sodium.crypto_secretbox_NONCEBYTES);
+                  sodium.randombytes_buf(nonce);
+             
+                  // Encrypt the transaction payload with XSalsa20
+                  this.encryptedTransaction = Buffer.alloc(
+                    transactionString.length + sodium.crypto_secretbox_MACBYTES
+                  );
+                  sodium.crypto_secretbox_easy(
+                    this.encryptedTransaction,
+                    Buffer.from(transactionString),
+                    nonce,
+                    key
+                  );
+             
+                  // Generate Poly1305 authentication tag for the encrypted payload
+                  this.transactionTag = Buffer.alloc(sodium.crypto_auth_BYTES);
+                  sodium.crypto_auth(this.transactionTag, this.encryptedTransaction, key);
+                }
+             
+                calculateMerkleRoot() {
+                  const transactionHash = this.hash(this.encryptedTransaction);
+                  this.merkleRoot = transactionHash;
+                }
+             
+                hash(data) {
+                  return crypto.createHash("blake2b512").update(data).digest("hex");
+                }
+              }
+
+
+              //create the block with previousHash and the decryptedData
+              const block= new Block(previousHash, decryptedData)
+              
+              //get the hash
+              const hash=block.merkleRoot
+             
+
+              //sign the hash using the notary's private key
+              const signedHash=signTransactionHash(hash.toString(),process.env.notary1_private_key.toString(),log)
+             
+              //add the transaction in commit bucket
+              await databases.createDocument(databaseId, commitBucketId ,randomDocId, {
+              name:document.name,
+              id:document.id,
+              status:"txn verified",
+              txId: txIdToCheck,
+              hash:hash.toString(),
+              signedHash:signedHash.signTransactionHash
+
+              });
+
+
+              //delete the transaction from temp bucket
+              await databases.deleteDocument(databaseId, collectionId_temp, documentId_temp);
+
+              //update the previous hash from the collection inside notary-pool
+              const updatedHash=  updateLastTransactionHash(hash,process.env.PROJECT_ID,process.env.DATABASE_ID,process.env.previousHash_CollectionId,process.env.previousHash_DocId,process.env.APPWRITE_API_KEY)
+              log(`Document with txId ${txIdToCheck} does not exist in commit bucket.`);
             }
-            const updatedHash=  updateLastTransactionHash(hash,process.env.PROJECT_ID,process.env.DATABASE_ID,process.env.previousHash_CollectionId,process.env.previousHash_DocId,process.env.APPWRITE_API_KEY)
+            
             
             return res.send("triggered");
-
-
-
-
-
-           
-       
-
-        } catch (error1) {
-        error('Error accessing document: ' + error1);
-        return res.send("Not added to commit bucket"+error1);
+} catch (error1) {
+        error('Error occured: ' + error1);
+        return res.send("Error: "+error1);
         }
             
 };
