@@ -187,7 +187,7 @@ const getPreviousHash =async (projectId,databaseId,collectionId,docId,apikey) =>
   const databases = new Databases(client);
 
   const document = await databases.getDocument(databaseId,collectionId,docId);
-  return document.hash
+  return document.previousHash
 };
 
 
@@ -224,7 +224,7 @@ const updateLastTransactionHash=async(newHash,projectId,databaseId,collectionId,
     databaseId, 
     collectionId,
     docId,
-    { hash:newHash  }
+    { previousHash:newHash  }
 );}catch(error1){log("erro1: "+error1)}
 return newHash
 }
